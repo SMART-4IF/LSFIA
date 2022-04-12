@@ -9,7 +9,7 @@ mp_holistic = mp.solutions.holistic  # Holistic model
 mp_drawing = mp.solutions.drawing_utils  # Drawing utilitiesdef mediapipe_detection(image, model):
 
 # Path for exported data, numpy arrays
-DATA_PATH = os.path.join('MP_Data-FR')
+DATA_PATH = os.path.join('MP_Data-FRv2')
 
 # Actions that we try to detect
 actions = np.array(['gauche', 'droite'])
@@ -22,7 +22,6 @@ sequence_length = 30
 
 # Folder start
 start_folder = 1
-
 
 def mediapipe_detection(image, model):
     image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)  # COLOR CONVERSION BGR 2 RGB
@@ -81,8 +80,9 @@ def extract_keypoints(results):
         21 * 3)
     return np.concatenate([pose, face, lh, rh])
 
-
 def folder_preparation():
+    if not os.path.exists(DATA_PATH):
+        os.makedirs(DATA_PATH)
     for action in actions:
         if np.array(os.listdir(os.path.join(DATA_PATH, action))).astype(int).size != 0:
             dirmax = np.max(np.array(os.listdir(os.path.join(DATA_PATH, action))).astype(int))
@@ -129,3 +129,60 @@ def change_referential(results):
                        results.right_hand_landmarks.landmark]).flatten() if results.right_hand_landmarks else np.zeros(
             21 * 3)
     return np.concatenate([pose, face, lh, rh])
+
+# Record mediapipe detected sequences of landmarks
+def record_data():
+    cap = cv2.VideoCapture(0)
+    # Set mediapipe model
+    with mp_holistic.Holistic(min_detection_confidence=0.5, min_tracking_confidence=0.5) as holistic:
+
+        # NEW LOOP
+        # Loop through actions
+        for action in actions:
+            # Loop through sequences aka videos
+
+            #set start_folder
+            dirmax = np.max(np.array(os.listdir(os.path.join(DATA_PATH, action))).astype(int))
+            start_folder = dirmax - no_sequences + 1
+
+            for sequence in range(start_folder, start_folder + no_sequences):
+                # Loop through video length aka sequence length
+                for frame_num in range(sequence_length):
+
+                    # Read feed
+                    ret, frame = cap.read()
+
+                    # Make detections
+                    image, results = mediapipe_detection(frame, holistic)
+
+                    # Draw landmarks
+                    draw_styled_landmarks(image, results)
+
+                    # NEW Apply wait logic
+                    if frame_num == 0:
+                        cv2.putText(image, 'STARTING COLLECTION', (120, 200),
+                                    cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 4, cv2.LINE_AA)
+                        cv2.putText(image, 'Collecting frames for {} Video Number {}'.format(action, sequence),
+                                    (15, 12),
+                                    cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 1, cv2.LINE_AA)
+                        # Show to screen
+                        cv2.imshow('OpenCV Feed', image)
+                        cv2.waitKey(500)
+                    else:
+                        cv2.putText(image, 'Collecting frames for {} Video Number {}'.format(action, sequence),
+                                    (15, 12),
+                                    cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 1, cv2.LINE_AA)
+                        # Show to screen
+                        cv2.imshow('OpenCV Feed', image)
+
+                    # NEW Export keypoints
+                    keypoints = change_referential(results)
+                    npy_path = os.path.join(DATA_PATH, action, str(sequence), str(frame_num))
+                    np.save(npy_path, keypoints)
+
+                    # Break gracefully
+                    if cv2.waitKey(10) & 0xFF == ord('q'):
+                        break
+
+        cap.release()
+        cv2.destroyAllWindows()

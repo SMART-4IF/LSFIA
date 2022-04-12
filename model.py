@@ -9,36 +9,20 @@ import os
 from matplotlib import pyplot as plt
 import time
 import mediapipe as mp
+import datacollection as datacollection
 
 # log_dir = os.path.join('Logs')
 # tb_callback = TensorBoard(log_dir=log_dir)
 
-# Actions that we try to detect
-actions = np.array(['gauche', 'droite'])
+label_map = {label: num for num, label in enumerate(datacollection.actions)}
 
-# Path for exported data, numpy arrays
-DATA_PATH = os.path.join('MP_Data-FR')
-
-# Actions that we try to detect
-actions = np.array(['gauche', 'droite'])
-
-# Thirty videos worth of data
-no_sequences = 30
-
-# Videos are going to be 20 frames in length
-sequence_length = 30
-
-# Folder start
-start_folder = 1
-
-label_map = {label: num for num, label in enumerate(actions)}
+model = Sequential()
 
 sequences, labels = [], []
 
-global model
-
 
 def start_model():
+    load_seq()
     training_data = data_preparation()
     build_model()
     train_model(X_train=training_data.X_train, y_train=training_data.y_train)
@@ -60,13 +44,12 @@ def data_preparation():
 
 
 def build_model():
-    model = Sequential()
     model.add(LSTM(64, return_sequences=True, activation='relu', input_shape=(30, 1662)))
     model.add(LSTM(128, return_sequences=True, activation='relu'))
     model.add(LSTM(64, return_sequences=False, activation='relu'))
     model.add(Dense(64, activation='relu'))
     model.add(Dense(32, activation='relu'))
-    model.add(Dense(actions.shape[0], activation='softmax'))
+    model.add(Dense(datacollection.actions.shape[0], activation='softmax'))
 
 
 def train_model(X_train, y_train):
@@ -74,12 +57,13 @@ def train_model(X_train, y_train):
     model.fit(X_train, y_train, epochs=2000)
     model.summary()
 
+
 def load_seq():
-    for action in actions:
-        for sequence in np.array(os.listdir(os.path.join(DATA_PATH, action))).astype(int):
+    for action in datacollection.actions:
+        for sequence in np.array(os.listdir(os.path.join(datacollection.DATA_PATH, action))).astype(int):
             window = []
-            for frame_num in range(sequence_length):
-                res = np.load(os.path.join(DATA_PATH, action, str(sequence), "{}.npy".format(frame_num)))
+            for frame_num in range(datacollection.sequence_length):
+                res = np.load(os.path.join(datacollection.DATA_PATH, action, str(sequence), "{}.npy".format(frame_num)))
                 window.append(res)
             sequences.append(window)
             labels.append(label_map[action])
