@@ -6,11 +6,11 @@ import evaluation as evaluation
 def main():
     print("Welcome to LSF recognition")
     print("Preparating folders...")
-    datacollection.folder_preparation()
+    # datacollection.folder_preparation()
 
     # Record data
     print("Starting to record data...")
-    datacollection.record_data()
+    # datacollection.record_data()
 
     print("Building and training the model...")
     model.start_model()

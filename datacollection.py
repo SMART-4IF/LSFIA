@@ -12,13 +12,14 @@ mp_drawing = mp.solutions.drawing_utils  # Drawing utilitiesdef mediapipe_detect
 DATA_PATH = os.path.join('MP_Data-FRv2')
 
 # Actions that we try to detect
-actions = np.array(['gauche', 'droite'])
+# actions = np.array(['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'])
+actions = np.array(['R', 'L'])
 
 # Thirty videos worth of data
-no_sequences = 30
+no_sequences = 100
 
 # Videos are going to be 20 frames in length
-sequence_length = 30
+sequence_length = 1
 
 # Folder start
 start_folder = 1
@@ -140,6 +141,7 @@ def record_data():
         # Loop through actions
         for action in actions:
             # Loop through sequences aka videos
+            time.sleep(2)
 
             #set start_folder
             dirmax = np.max(np.array(os.listdir(os.path.join(DATA_PATH, action))).astype(int))

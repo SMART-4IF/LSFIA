@@ -44,7 +44,8 @@ def data_preparation():
 
 
 def build_model():
-    model.add(LSTM(64, return_sequences=True, activation='relu', input_shape=(30, 1662)))
+    # time steps = sequence_length - dimension = number of points per sequence
+    model.add(LSTM(64, return_sequences=True, activation='relu', input_shape=(10, 1662)))
     model.add(LSTM(128, return_sequences=True, activation='relu'))
     model.add(LSTM(64, return_sequences=False, activation='relu'))
     model.add(Dense(64, activation='relu'))
@@ -54,12 +55,13 @@ def build_model():
 
 def train_model(X_train, y_train):
     model.compile(optimizer='Adam', loss='categorical_crossentropy', metrics=['categorical_accuracy'])
-    model.fit(X_train, y_train, epochs=2000)
+    model.fit(X_train, y_train, epochs=500)
     model.summary()
 
 
 def load_seq():
     for action in datacollection.actions:
+        print("Loading sequences for action = " + action)
         for sequence in np.array(os.listdir(os.path.join(datacollection.DATA_PATH, action))).astype(int):
             window = []
             for frame_num in range(datacollection.sequence_length):
@@ -67,3 +69,5 @@ def load_seq():
                 window.append(res)
             sequences.append(window)
             labels.append(label_map[action])
+    print('Sequences = ' + str(sequences))
+    print('Labels = ' + str(labels))
