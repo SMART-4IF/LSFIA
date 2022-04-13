@@ -10,12 +10,13 @@ def main():
 
     # Record data
     print("Starting to record data...")
-    datacollection.record_data()
+    #datacollection.record_data()
+    datacollection.analyse_data()
 
     print("Building and training the model...")
-    model.start_model()
+    #model.start_model()
     print("Live predcition")
-    evaluation.realtime_prediction()
+    #evaluation.realtime_prediction()
 
 
 if __name__ == "__main__":
