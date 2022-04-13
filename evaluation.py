@@ -14,7 +14,7 @@ def test_model(X_test, y_test):
     accuracy_score(ytrue, yhat)
 
 
-colors = [(245, 117, 16), (117, 245, 16), (16, 117, 245)]
+colors = [(245, 117, 16), (117, 245, 16), (16, 117, 245), (245, 100, 16), (117, 25, 16), (36, 117, 245), (245, 117, 56), (127, 245, 16), (16, 117, 245), (56, 117, 245)]
 
 
 def prob_viz(res, actions, input_frame, colors):
@@ -51,11 +51,13 @@ def realtime_prediction():
             # 2. Prediction logic
             keypoints = datacollection.change_referential(results)  # TODO extract key points with referential change
             sequence.append(keypoints)
-            sequence = sequence[-30:]
+            sequence = sequence[-1:]
 
-            if len(sequence) == 30:
+            if len(sequence) == 1:
                 res = m.model.predict(np.expand_dims(sequence, axis=0))[0]
-                print(datacollection.actions[np.argmax(res)])
+                print("Res = " + str(res))
+                best_fit = np.argmax(res)
+                print('Label = ' + datacollection.actions[best_fit] + ' accuracy = ' + str(best_fit))
                 predictions.append(np.argmax(res))
 
                 # 3. Viz logic

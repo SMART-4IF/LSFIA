@@ -66,11 +66,11 @@ def draw_landmarks(image, results):
 
 def draw_styled_landmarks(image, results):
     # Draw face connections
-    mp_drawing.draw_landmarks(
-        image, results.face_landmarks, mp_holistic.FACEMESH_TESSELATION,
-        mp_drawing.DrawingSpec(color=(80, 110, 10), thickness=1, circle_radius=1),
-        mp_drawing.DrawingSpec(color=(80, 256, 121), thickness=1, circle_radius=1)
-    )
+    #mp_drawing.draw_landmarks(
+    #    image, results.face_landmarks, mp_holistic.FACEMESH_TESSELATION,
+    #    mp_drawing.DrawingSpec(color=(80, 110, 10), thickness=1, circle_radius=1),
+    #    mp_drawing.DrawingSpec(color=(80, 256, 121), thickness=1, circle_radius=1)
+    #)
     # Draw pose connections
     mp_drawing.draw_landmarks(
         image, results.pose_landmarks, mp_holistic.POSE_CONNECTIONS,
@@ -161,7 +161,7 @@ def change_referential(results):
         rh = np.array([[res.x, res.y, res.z] for res in
                        results.right_hand_landmarks.landmark]).flatten() if results.right_hand_landmarks else np.zeros(
             21 * 3)
-    return np.concatenate([pose, face, lh, rh])
+    return np.concatenate([pose, lh, rh]) # face is missing
 
 
 def analyse_data():
@@ -221,6 +221,7 @@ def record_data():
         # Loop through actions
         for action in actions:
             # Loop through sequences aka videos
+            time.sleep(2)
 
             # set start_folder
             dirmax = np.max(np.array(os.listdir(os.path.join(DATA_PATH, action))).astype(int))
