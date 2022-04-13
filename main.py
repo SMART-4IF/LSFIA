@@ -5,6 +5,8 @@ import evaluation as evaluation
 
 def main():
     print("Welcome to LSF recognition")
+    print("Preparating global variables...")
+    datacollection.init_video_variables()
     print("Preparating folders...")
     datacollection.folder_preparation()
 
@@ -14,9 +16,9 @@ def main():
     datacollection.analyse_data()
 
     print("Building and training the model...")
-    #model.start_model()
+    model.start_model()
     print("Live predcition")
-    #evaluation.realtime_prediction()
+    evaluation.realtime_prediction()
 
 
 if __name__ == "__main__":
