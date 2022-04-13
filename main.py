@@ -9,7 +9,7 @@ def main():
     datacollection.folder_preparation()
 
     # Record data
-    print("Starting to record data...")
+    print("Starting to analyse data...")
     #datacollection.record_data()
     datacollection.analyse_data()
 
