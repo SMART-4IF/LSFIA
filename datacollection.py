@@ -13,10 +13,10 @@ DATA_PATH = os.path.join('MP_Data-FRv2')
 
 # Actions that we try to detect
 # actions = np.array(['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'])
-actions = np.array(['R', 'L'])
+actions = np.array(['A', 'B', 'C', 'D'])
 
-# Thirty videos worth of data
-no_sequences = 100
+# Number of videos for each action
+no_sequences = 40
 
 # Videos are going to be 20 frames in length
 sequence_length = 1
@@ -44,11 +44,11 @@ def draw_landmarks(image, results):
 
 def draw_styled_landmarks(image, results):
     # Draw face connections
-    mp_drawing.draw_landmarks(
-        image, results.face_landmarks, mp_holistic.FACEMESH_TESSELATION,
-        mp_drawing.DrawingSpec(color=(80, 110, 10), thickness=1, circle_radius=1),
-        mp_drawing.DrawingSpec(color=(80, 256, 121), thickness=1, circle_radius=1)
-    )
+    #mp_drawing.draw_landmarks(
+    #    image, results.face_landmarks, mp_holistic.FACEMESH_TESSELATION,
+    #    mp_drawing.DrawingSpec(color=(80, 110, 10), thickness=1, circle_radius=1),
+    #    mp_drawing.DrawingSpec(color=(80, 256, 121), thickness=1, circle_radius=1)
+    #)
     # Draw pose connections
     mp_drawing.draw_landmarks(
         image, results.pose_landmarks, mp_holistic.POSE_CONNECTIONS,
@@ -129,7 +129,7 @@ def change_referential(results):
         rh = np.array([[res.x, res.y, res.z] for res in
                        results.right_hand_landmarks.landmark]).flatten() if results.right_hand_landmarks else np.zeros(
             21 * 3)
-    return np.concatenate([pose, face, lh, rh])
+    return np.concatenate([pose, lh, rh]) # face is missing
 
 # Record mediapipe detected sequences of landmarks
 def record_data():
