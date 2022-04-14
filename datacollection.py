@@ -1,5 +1,4 @@
 import shutil
-
 import cv2
 import numpy as np
 import os
@@ -19,31 +18,31 @@ DATASET_PATH = "..\dataset"
 # Actions that we try to detect
 # Let actions empty to detect all actions (signs)
 # Write down actions wanted like ["action1", "action2", "action3"] (it will manage)
-actions_wanted = []
-actions = []
+actions_wanted = np.array([])
+actions = np.array([])
 action_paths = {}
 
 # Total of videos for each sign
 no_sequences = []
 
 # Videos are going to be 30 frames in length
-sequence_length = 30
-
-for root, directories, files in os.walk(DATASET_PATH):
-    if len(directories) == 0:
-        actualdir = root.split("\\")[len(root.split("\\")) - 1]
-        if not len(actions_wanted) or actualdir in actions_wanted:
-            print(root)
-            actions.append(actualdir)
-            action_paths[actualdir] = root
-            n_seq = 0
-            for video in files:
-                n_seq += 1
-                video_path = os.path.join(DATASET_PATH, actualdir, video)
-            no_sequences.append(n_seq)
+sequence_length = 20
 
 # Folder start
 start_folder = 1
+
+def init_video_variables() :
+    for root, directories, files in os.walk(DATASET_PATH):
+        if len(directories) == 0:
+            actualdir = root.split("\\")[len(root.split("\\")) - 1]
+            if not len(actions_wanted) or actualdir in actions_wanted:
+                np.append(actions, actualdir)
+                action_paths[actualdir] = root
+                n_seq = 0
+                for video in files:
+                    n_seq += 1
+                    video_path = os.path.join(DATASET_PATH, actualdir, video)
+                no_sequences.append(n_seq)
 
 
 def mediapipe_detection(image, model):
@@ -110,9 +109,14 @@ def folder_preparation():
         os.makedirs(DATA_PATH)
 
     for action in actions:
-        if os.path.exists(os.path.join(DATA_PATH, action)):
-            shutil.rmtree(os.path.join(DATA_PATH, action))
-        os.makedirs(os.path.join(DATA_PATH, action))
+        if len(actions_wanted) != 0 :
+            if action in actions_wanted and os.path.exists(os.path.join(DATA_PATH, action)):
+                shutil.rmtree(os.path.join(DATA_PATH, action))
+            os.makedirs(os.path.join(DATA_PATH, action))
+        else :
+            if os.path.exists(os.path.join(DATA_PATH, action)):
+                shutil.rmtree(os.path.join(DATA_PATH, action))
+            os.makedirs(os.path.join(DATA_PATH, action))
 
 
     for action, nbVideo in zip(actions, no_sequences):
@@ -180,8 +184,11 @@ def analyse_data():
 
                 video_num += 1
 
+                frame_number = frame_count(action_paths.get(action) + "/" + video, True)
+                print(action_paths.get(action) + "/" + video + " :: " + str(frame_number) + " frames")
+
                 # Loop through video length aka sequence length
-                for frame_num in range(sequence_length):
+                for frame_num in range(frame_number):
 
                     # Read feed
                     success, frame = cap.read()
@@ -195,7 +202,7 @@ def analyse_data():
                     # Draw landmarks
                     draw_styled_landmarks(image, results)
 
-                    cv2.imshow('OpenCV Feed', image)
+                    #cv2.imshow('OpenCV Feed', image)
                     # cv2.waitKey(2000)
                     # NEW Export keypoints
                     keypoints = extract_keypoints(results)
@@ -205,9 +212,8 @@ def analyse_data():
                     # Break gracefully
                     if cv2.waitKey(10) & 0xFF == ord('q'):
                         break
-                cap.release()
+                    cap.release()
 
-        cap.release()
         cv2.destroyAllWindows()
 
 
