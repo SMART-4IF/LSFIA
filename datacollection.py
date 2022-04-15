@@ -13,12 +13,12 @@ mp_drawing = mp.solutions.drawing_utils  # Drawing utilitiesdef mediapipe_detect
 DATA_PATH = os.path.join('MP_Data-FRv2')
 
 # Path for import dataset
-DATASET_PATH = "..\dataset"
+DATASET_PATH = "videos"
 
 # Actions that we try to detect
 # Let actions empty to detect all actions (signs)
 # Write down actions wanted like ["action1", "action2", "action3"] (it will manage)
-actions_wanted = np.array([])
+actions_wanted = np.array(['hello'])
 actions = np.array([])
 action_paths = {}
 
@@ -31,12 +31,17 @@ sequence_length = 20
 # Folder start
 start_folder = 1
 
-def init_video_variables() :
+
+def init_video_variables():
+    global actions
     for root, directories, files in os.walk(DATASET_PATH):
         if len(directories) == 0:
-            actualdir = root.split("\\")[len(root.split("\\")) - 1]
+            print("Root = " + root)
+            actualdir = root.split("/")[len(root.split("/")) - 1]
             if not len(actions_wanted) or actualdir in actions_wanted:
-                np.append(actions, actualdir)
+                print("actualdir = " + actualdir)
+                actions = np.append(actions, actualdir)
+                print("actions = " + str(actions))
                 action_paths[actualdir] = root
                 n_seq = 0
                 for video in files:
@@ -65,11 +70,11 @@ def draw_landmarks(image, results):
 
 def draw_styled_landmarks(image, results):
     # Draw face connections
-    #mp_drawing.draw_landmarks(
+    # mp_drawing.draw_landmarks(
     #    image, results.face_landmarks, mp_holistic.FACEMESH_TESSELATION,
     #    mp_drawing.DrawingSpec(color=(80, 110, 10), thickness=1, circle_radius=1),
     #    mp_drawing.DrawingSpec(color=(80, 256, 121), thickness=1, circle_radius=1)
-    #)
+    # )
     # Draw pose connections
     mp_drawing.draw_landmarks(
         image, results.pose_landmarks, mp_holistic.POSE_CONNECTIONS,
@@ -109,15 +114,14 @@ def folder_preparation():
         os.makedirs(DATA_PATH)
 
     for action in actions:
-        if len(actions_wanted) != 0 :
+        if len(actions_wanted) != 0:
             if action in actions_wanted and os.path.exists(os.path.join(DATA_PATH, action)):
                 shutil.rmtree(os.path.join(DATA_PATH, action))
             os.makedirs(os.path.join(DATA_PATH, action))
-        else :
+        else:
             if os.path.exists(os.path.join(DATA_PATH, action)):
                 shutil.rmtree(os.path.join(DATA_PATH, action))
             os.makedirs(os.path.join(DATA_PATH, action))
-
 
     for action, nbVideo in zip(actions, no_sequences):
         if np.array(os.listdir(os.path.join(DATA_PATH, action))).astype(int).size != 0:
@@ -165,7 +169,7 @@ def change_referential(results):
         rh = np.array([[res.x, res.y, res.z] for res in
                        results.right_hand_landmarks.landmark]).flatten() if results.right_hand_landmarks else np.zeros(
             21 * 3)
-    return np.concatenate([pose, lh, rh]) # face is missing
+    return np.concatenate([pose, lh, rh])  # face is missing
 
 
 def analyse_data():
@@ -202,7 +206,7 @@ def analyse_data():
                     # Draw landmarks
                     draw_styled_landmarks(image, results)
 
-                    #cv2.imshow('OpenCV Feed', image)
+                    # cv2.imshow('OpenCV Feed', image)
                     # cv2.waitKey(2000)
                     # NEW Export keypoints
                     keypoints = extract_keypoints(results)
@@ -274,6 +278,7 @@ def record_data():
 
         cap.release()
         cv2.destroyAllWindows()
+
 
 def frame_count(video_path, manual=False):
     def manual_count(handler):
