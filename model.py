@@ -38,6 +38,7 @@ class TrainingData:
 
 def data_preparation():
     X = np.array(sequences)
+    print('Labels = ' + str(labels))
     y = to_categorical(labels).astype(int)
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.05)
     return TrainingData(X_train, X_test, y_train, y_test)

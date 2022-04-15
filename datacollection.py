@@ -2,9 +2,11 @@ import shutil
 import cv2
 import numpy as np
 import os
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 from matplotlib import pyplot as plt
 import time
 import mediapipe as mp
+
 
 mp_holistic = mp.solutions.holistic  # Holistic model
 mp_drawing = mp.solutions.drawing_utils  # Drawing utilitiesdef mediapipe_detection(image, model):
@@ -18,7 +20,7 @@ DATASET_PATH = "..\dataset"
 # Actions that we try to detect
 # Let actions empty to detect all actions (signs)
 # Write down actions wanted like ["action1", "action2", "action3"] (it will manage)
-actions_wanted = np.array([])
+actions_wanted = np.array(["Jaime"])
 actions = np.array([])
 action_paths = {}
 
@@ -31,19 +33,20 @@ sequence_length = 20
 # Folder start
 start_folder = 1
 
-def init_video_variables() :
+
+def init_video_variables():
+    global actions
     for root, directories, files in os.walk(DATASET_PATH):
         if len(directories) == 0:
             actualdir = root.split("\\")[len(root.split("\\")) - 1]
             if not len(actions_wanted) or actualdir in actions_wanted:
-                np.append(actions, actualdir)
+                actions = np.append(actions, actualdir)
                 action_paths[actualdir] = root
                 n_seq = 0
                 for video in files:
                     n_seq += 1
-                    video_path = os.path.join(DATASET_PATH, actualdir, video)
+                    #video_path = os.path.join(DATASET_PATH, actualdir, video)
                 no_sequences.append(n_seq)
-
 
 def mediapipe_detection(image, model):
     image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)  # COLOR CONVERSION BGR 2 RGB
@@ -175,7 +178,6 @@ def analyse_data():
         # NEW LOOP
         # Loop through actions
         for action, nbVideo in zip(actions, no_sequences):
-
             video_num = 0
 
             # Loop through sequences aka videos
