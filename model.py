@@ -93,3 +93,8 @@ def load_seq():
     #print('Sequences = ' + str(sequences))
     #print('Labels = ' + str(labels))
 
+def getMaxNumberFrame():
+    for root, directories, files in os.walk(cfg.DATA_PATH):
+        if len(directories) == 0:
+            if len(files) > cfg.maxNumberFrame:
+                cfg.maxNumberFrame = len(files)

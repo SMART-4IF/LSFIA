@@ -24,3 +24,6 @@ action_paths = {}
 # Total of videos for each sign
 no_sequences = []
 
+sequence_length = 20
+
+maxNumberFrame = 0

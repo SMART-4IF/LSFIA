@@ -1,5 +1,6 @@
 import datacollection as datacollection
 import model as model
+import configuration
 import evaluation as evaluation
 
 
@@ -16,10 +17,9 @@ def main():
     #datacollection.analyse_data()
 
     print("Building and training the model...")
-    model.start_model()
+    #model.start_model()
     print("Live predcition")
     #evaluation.realtime_prediction()
-
 
 if __name__ == "__main__":
     main()
