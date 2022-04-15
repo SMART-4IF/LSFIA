@@ -12,7 +12,7 @@ def main():
 
     # Record data
     print("Starting to analyse data...")
-    #datacollection.record_data()
+    # datacollection.record_data()
     datacollection.analyse_data()
 
     print("Building and training the model...")

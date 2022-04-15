@@ -33,7 +33,9 @@ sequence_length = 20
 # Folder start
 start_folder = 1
 
-def init_video_variables() :
+
+def init_video_variables():
+    global actions
     for root, directories, files in os.walk(DATASET_PATH):
         if len(directories) == 0:
             actualdir = root.split("\\")[len(root.split("\\")) - 1]
@@ -66,11 +68,11 @@ def draw_landmarks(image, results):
 
 def draw_styled_landmarks(image, results):
     # Draw face connections
-    #mp_drawing.draw_landmarks(
+    # mp_drawing.draw_landmarks(
     #    image, results.face_landmarks, mp_holistic.FACEMESH_TESSELATION,
     #    mp_drawing.DrawingSpec(color=(80, 110, 10), thickness=1, circle_radius=1),
     #    mp_drawing.DrawingSpec(color=(80, 256, 121), thickness=1, circle_radius=1)
-    #)
+    # )
     # Draw pose connections
     mp_drawing.draw_landmarks(
         image, results.pose_landmarks, mp_holistic.POSE_CONNECTIONS,
@@ -110,15 +112,14 @@ def folder_preparation():
         os.makedirs(DATA_PATH)
 
     for action in actions:
-        if len(actions_wanted) != 0 :
+        if len(actions_wanted) != 0:
             if action in actions_wanted and os.path.exists(os.path.join(DATA_PATH, action)):
                 shutil.rmtree(os.path.join(DATA_PATH, action))
             os.makedirs(os.path.join(DATA_PATH, action))
-        else :
+        else:
             if os.path.exists(os.path.join(DATA_PATH, action)):
                 shutil.rmtree(os.path.join(DATA_PATH, action))
             os.makedirs(os.path.join(DATA_PATH, action))
-
 
     for action, nbVideo in zip(actions, no_sequences):
         if np.array(os.listdir(os.path.join(DATA_PATH, action))).astype(int).size != 0:
@@ -166,7 +167,7 @@ def change_referential(results):
         rh = np.array([[res.x, res.y, res.z] for res in
                        results.right_hand_landmarks.landmark]).flatten() if results.right_hand_landmarks else np.zeros(
             21 * 3)
-    return np.concatenate([pose, lh, rh]) # face is missing
+    return np.concatenate([pose, lh, rh])  # face is missing
 
 
 def analyse_data():
@@ -176,6 +177,7 @@ def analyse_data():
         # NEW LOOP
         # Loop through actions
         for action, nbVideo in zip(actions, no_sequences):
+
             video_num = 0
 
             # Loop through sequences aka videos
@@ -202,7 +204,7 @@ def analyse_data():
                     # Draw landmarks
                     draw_styled_landmarks(image, results)
 
-                    #cv2.imshow('OpenCV Feed', image)
+                    # cv2.imshow('OpenCV Feed', image)
                     # cv2.waitKey(2000)
                     # NEW Export keypoints
                     keypoints = extract_keypoints(results)
