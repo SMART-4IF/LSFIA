@@ -9,6 +9,8 @@ import os
 from matplotlib import pyplot as plt
 import time
 import mediapipe as mp
+
+import configuration
 import datacollection as datacollection
 import configuration as conf
 
@@ -50,7 +52,7 @@ def data_preparation():
 
 def build_model():
     # time steps = sequence_length - dimension = number of points per sequence
-    model.add(LSTM(64, return_sequences=True, activation='relu', input_shape=(80, 258)))
+    model.add(LSTM(64, return_sequences=True, activation='relu', input_shape=(configuration.maxNumberFrame, 258)))
     model.add(LSTM(128, return_sequences=True, activation='relu'))
     model.add(LSTM(64, return_sequences=False, activation='relu'))
     model.add(Dense(64, activation='relu'))
@@ -67,7 +69,9 @@ def train_model(X_train, y_train):
 def load_seq():
     global label_map
     label_map = {label: num for num, label in enumerate(conf.actions)}
+    getMaxNumberFrame()
     for root, directories, files in os.walk(conf.DATA_PATH):
+        numberFrames = len(files)
         if len(directories) == 0:
             print("root " + root + " : len files " + str(len(files)))
             window = []
@@ -75,7 +79,7 @@ def load_seq():
                 res = np.load(os.path.join(root, frame_name))
                 print("res : " + str(res))
                 window.append(res)
-            sequences.append(window)
+            sequences.append(fill_blank_sequence(window, numberFrames, configuration.maxNumberFrame))
             action = root.split("/")[len(root.split("/")) - 2]
             print("action : " + action)
             # labels.append(action)
@@ -84,22 +88,31 @@ def load_seq():
     # print('Sequences = ' + str(sequences))
     print('Labels = ' + str(labels))
 
-
-    #for action in cfg.actions:
+    # for action in cfg.actions:
     #    print("Loading sequences for action = " + action)
     #    for sequence in np.array(os.listdir(os.path.join(cfg.DATA_PATH, action))).astype(int):
     #        window = []
     #        print("sequence : " + str(sequence))
-            #for frame_num in range(datacollection.sequence_length):
-            #    res = np.load(os.path.join(datacollection.DATA_PATH, action, str(sequence), "{}.npy".format(frame_num)))
-            #    window.append(res)
-            #sequences.append(window)
-            #labels.append(label_map[action])
-    #print('Sequences = ' + str(sequences))
-    #print('Labels = ' + str(labels))
+    # for frame_num in range(datacollection.sequence_length):
+    #    res = np.load(os.path.join(datacollection.DATA_PATH, action, str(sequence), "{}.npy".format(frame_num)))
+    #    window.append(res)
+    # sequences.append(window)
+    # labels.append(label_map[action])
+    # print('Sequences = ' + str(sequences))
+    # print('Labels = ' + str(labels))
+
 
 def getMaxNumberFrame():
     for root, directories, files in os.walk(conf.DATA_PATH):
         if len(directories) == 0:
             if len(files) > conf.maxNumberFrame:
                 conf.maxNumberFrame = len(files)
+
+
+def fill_blank_sequence(sequence, length, max_length):
+    i = max_length - length
+    j = 0
+    while j < i:
+        sequence.append(np.concatenate([np.zeros(33 * 4), np.zeros(21 * 3), np.zeros(21 * 3)]))
+        j += 1
+    return sequence
