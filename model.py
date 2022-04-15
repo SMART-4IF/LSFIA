@@ -10,6 +10,7 @@ from matplotlib import pyplot as plt
 import time
 import mediapipe as mp
 import datacollection as datacollection
+import configuration as cfg
 
 # log_dir = os.path.join('Logs')
 # tb_callback = TensorBoard(log_dir=log_dir)
@@ -23,9 +24,9 @@ sequences, labels = [], []
 
 def start_model():
     load_seq()
-    training_data = data_preparation()
-    build_model()
-    train_model(X_train=training_data.X_train, y_train=training_data.y_train)
+    #training_data = data_preparation()
+    #build_model()
+    #train_model(X_train=training_data.X_train, y_train=training_data.y_train)
 
 
 class TrainingData:
@@ -61,14 +62,34 @@ def train_model(X_train, y_train):
 
 
 def load_seq():
-    for action in datacollection.actions:
-        print("Loading sequences for action = " + action)
-        for sequence in np.array(os.listdir(os.path.join(datacollection.DATA_PATH, action))).astype(int):
+    for root, directories, files in os.walk(cfg.DATA_PATH):
+        if len(directories) == 0:
+            print("root " + root + " : len files " + str(len(files)))
             window = []
-            for frame_num in range(datacollection.sequence_length):
-                res = np.load(os.path.join(datacollection.DATA_PATH, action, str(sequence), "{}.npy".format(frame_num)))
+            for frame_name in files:
+                res = np.load(os.path.join(root, frame_name))
+                print("res : " + str(res))
                 window.append(res)
             sequences.append(window)
-            labels.append(label_map[action])
+            action = root.split("\\")[len(root.split("\\")) - 2]
+            print("action : " + action)
+            labels.append(action)
+            #TODO Allan pas compris ce que c'est en dessous
+            #labels.append(label_map[action])
     print('Sequences = ' + str(sequences))
     print('Labels = ' + str(labels))
+
+
+    #for action in cfg.actions:
+    #    print("Loading sequences for action = " + action)
+    #    for sequence in np.array(os.listdir(os.path.join(cfg.DATA_PATH, action))).astype(int):
+    #        window = []
+    #        print("sequence : " + str(sequence))
+            #for frame_num in range(datacollection.sequence_length):
+            #    res = np.load(os.path.join(datacollection.DATA_PATH, action, str(sequence), "{}.npy".format(frame_num)))
+            #    window.append(res)
+            #sequences.append(window)
+            #labels.append(label_map[action])
+    #print('Sequences = ' + str(sequences))
+    #print('Labels = ' + str(labels))
+

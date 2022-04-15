@@ -11,29 +11,6 @@ import mediapipe as mp
 mp_holistic = mp.solutions.holistic  # Holistic model
 mp_drawing = mp.solutions.drawing_utils  # Drawing utilitiesdef mediapipe_detection(image, model):
 
-# Path for exported data, numpy arrays
-DATA_PATH = os.path.join('MP_Data-FRv2')
-
-# Path for import dataset
-DATASET_PATH = "..\dataset"
-
-# Actions that we try to detect
-# Let actions empty to detect all actions (signs)
-# Write down actions wanted like ["action1", "action2", "action3"] (it will manage)
-actions_wanted = np.array(["Jaime"])
-actions = np.array([])
-action_paths = {}
-
-# Total of videos for each sign
-no_sequences = []
-
-# Videos are going to be 30 frames in length
-sequence_length = 20
-
-# Folder start
-start_folder = 1
-
-
 def init_video_variables():
     global actions
     for root, directories, files in os.walk(DATASET_PATH):
@@ -204,17 +181,22 @@ def analyse_data():
                     # Draw landmarks
                     draw_styled_landmarks(image, results)
 
-                    #cv2.imshow('OpenCV Feed', image)
-                    # cv2.waitKey(2000)
-                    # NEW Export keypoints
+                    # Export keypoints
                     keypoints = extract_keypoints(results)
                     npy_path = os.path.join(DATA_PATH, action, str(video_num), str(frame_num))
                     np.save(npy_path, keypoints)
 
+                    if increment == 9:
+                        increment = 0
+                        idASCII += 1
+                    else:
+                        increment += 1
+
                     # Break gracefully
                     if cv2.waitKey(10) & 0xFF == ord('q'):
                         break
-                    cap.release()
+
+                cap.release()
 
         cv2.destroyAllWindows()
 
