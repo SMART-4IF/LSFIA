@@ -6,24 +6,24 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 from matplotlib import pyplot as plt
 import time
 import mediapipe as mp
+import configuration as cfg
 
 
 mp_holistic = mp.solutions.holistic  # Holistic model
 mp_drawing = mp.solutions.drawing_utils  # Drawing utilitiesdef mediapipe_detection(image, model):
 
 def init_video_variables():
-    global actions
-    for root, directories, files in os.walk(DATASET_PATH):
+    for root, directories, files in os.walk(cfg.DATASET_PATH):
         if len(directories) == 0:
             actualdir = root.split("\\")[len(root.split("\\")) - 1]
-            if not len(actions_wanted) or actualdir in actions_wanted:
-                actions = np.append(actions, actualdir)
-                action_paths[actualdir] = root
+            if not len(cfg.actions_wanted) or actualdir in cfg.actions_wanted:
+                cfg.actions = np.append(cfg.actions, actualdir)
+                cfg.action_paths[actualdir] = root
                 n_seq = 0
                 for video in files:
                     n_seq += 1
-                    #video_path = os.path.join(DATASET_PATH, actualdir, video)
-                no_sequences.append(n_seq)
+                    #video_path = os.path.join(cfg.DATASET_PATH, actualdir, video)
+                cfg.no_sequences.append(n_seq)
 
 def mediapipe_detection(image, model):
     image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)  # COLOR CONVERSION BGR 2 RGB
@@ -85,28 +85,28 @@ def extract_keypoints(results):
 
 def folder_preparation():
     # Génération des dossiers
-    if not os.path.exists(DATA_PATH):
-        os.makedirs(DATA_PATH)
+    if not os.path.exists(cfg.DATA_PATH):
+        os.makedirs(cfg.DATA_PATH)
 
-    for action in actions:
-        if len(actions_wanted) != 0 :
-            if action in actions_wanted and os.path.exists(os.path.join(DATA_PATH, action)):
-                shutil.rmtree(os.path.join(DATA_PATH, action))
-            os.makedirs(os.path.join(DATA_PATH, action))
+    for action in cfg.actions:
+        if len(cfg.actions_wanted) != 0 :
+            if action in cfg.actions_wanted and os.path.exists(os.path.join(cfg.DATA_PATH, action)):
+                shutil.rmtree(os.path.join(cfg.DATA_PATH, action))
+            os.makedirs(os.path.join(cfg.DATA_PATH, action))
         else :
-            if os.path.exists(os.path.join(DATA_PATH, action)):
-                shutil.rmtree(os.path.join(DATA_PATH, action))
-            os.makedirs(os.path.join(DATA_PATH, action))
+            if os.path.exists(os.path.join(cfg.DATA_PATH, action)):
+                shutil.rmtree(os.path.join(cfg.DATA_PATH, action))
+            os.makedirs(os.path.join(cfg.DATA_PATH, action))
 
 
-    for action, nbVideo in zip(actions, no_sequences):
-        if np.array(os.listdir(os.path.join(DATA_PATH, action))).astype(int).size != 0:
-            dirmax = np.max(np.array(os.listdir(os.path.join(DATA_PATH, action))).astype(int))
+    for action, nbVideo in zip(cfg.actions, cfg.no_sequences):
+        if np.array(os.listdir(os.path.join(cfg.DATA_PATH, action))).astype(int).size != 0:
+            dirmax = np.max(np.array(os.listdir(os.path.join(cfg.DATA_PATH, action))).astype(int))
         else:
             dirmax = 0
         for sequence in range(1, nbVideo + 1):
             try:
-                os.makedirs(os.path.join(DATA_PATH, action, str(dirmax + sequence)))
+                os.makedirs(os.path.join(cfg.DATA_PATH, action, str(dirmax + sequence)))
             except:
                 pass
 
@@ -154,18 +154,20 @@ def analyse_data():
 
         # NEW LOOP
         # Loop through actions
-        for action, nbVideo in zip(actions, no_sequences):
+        for action, nbVideo in zip(cfg.actions, cfg.no_sequences):
             video_num = 0
 
             # Loop through sequences aka videos
-            for video in os.listdir(action_paths.get(action)):
-                cap = cv2.VideoCapture(action_paths.get(action) + "/" + video)
+            for video in os.listdir(cfg.action_paths.get(action)):
+                cap = cv2.VideoCapture(cfg.action_paths.get(action) + "/" + video)
 
                 video_num += 1
 
-                frame_number = frame_count(action_paths.get(action) + "/" + video, True)
-                print(action_paths.get(action) + "/" + video + " :: " + str(frame_number) + " frames")
+                frame_number = frame_count(cfg.action_paths.get(action) + "/" + video, True)
+                #print(cfg.action_paths.get(action) + "/" + video + " :: " + str(frame_number) + " frames")
 
+                increment = 0
+                idASCII = 97
                 # Loop through video length aka sequence length
                 for frame_num in range(frame_number):
 
@@ -183,7 +185,7 @@ def analyse_data():
 
                     # Export keypoints
                     keypoints = extract_keypoints(results)
-                    npy_path = os.path.join(DATA_PATH, action, str(video_num), str(frame_num))
+                    npy_path = os.path.join(cfg.DATA_PATH, action, str(video_num), chr(idASCII)+str(increment))
                     np.save(npy_path, keypoints)
 
                     if increment == 9:
@@ -209,17 +211,17 @@ def record_data():
 
         # NEW LOOP
         # Loop through actions
-        for action in actions:
+        for action in cfg.actions:
             # Loop through sequences aka videos
             time.sleep(2)
 
             # set start_folder
-            dirmax = np.max(np.array(os.listdir(os.path.join(DATA_PATH, action))).astype(int))
-            start_folder = dirmax - no_sequences + 1
+            dirmax = np.max(np.array(os.listdir(os.path.join(cfg.DATA_PATH, action))).astype(int))
+            start_folder = dirmax - cfg.no_sequences + 1
 
-            for sequence in range(start_folder, start_folder + no_sequences):
+            for sequence in range(start_folder, start_folder + cfg.no_sequences):
                 # Loop through video length aka sequence length
-                for frame_num in range(sequence_length):
+                for frame_num in range(cfg.sequence_length):
 
                     # Read feed
                     ret, frame = cap.read()
@@ -249,7 +251,7 @@ def record_data():
 
                     # NEW Export keypoints
                     keypoints = change_referential(results)
-                    npy_path = os.path.join(DATA_PATH, action, str(sequence), str(frame_num))
+                    npy_path = os.path.join(cfg.DATA_PATH, action, str(sequence), str(frame_num))
                     np.save(npy_path, keypoints)
 
                     # Break gracefully

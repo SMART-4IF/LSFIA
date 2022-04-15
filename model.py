@@ -15,7 +15,7 @@ import configuration as cfg
 # log_dir = os.path.join('Logs')
 # tb_callback = TensorBoard(log_dir=log_dir)
 
-label_map = {label: num for num, label in enumerate(datacollection.actions)}
+label_map = {label: num for num, label in enumerate(cfg.actions)}
 
 model = Sequential()
 
@@ -52,7 +52,7 @@ def build_model():
     model.add(LSTM(64, return_sequences=False, activation='relu'))
     model.add(Dense(64, activation='relu'))
     model.add(Dense(32, activation='relu'))
-    model.add(Dense(datacollection.actions.shape[0], activation='softmax'))
+    model.add(Dense(cfg.actions.shape[0], activation='softmax'))
 
 
 def train_model(X_train, y_train):
