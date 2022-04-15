@@ -49,7 +49,7 @@ def realtime_prediction():
             datacollection.draw_styled_landmarks(image, results)
 
             # 2. Prediction logic
-            keypoints = datacollection.change_referential(results)  # TODO extract key points with referential change
+            keypoints = datacollection.extract_keypoints(results)
             sequence.append(keypoints)
             sequence = sequence[-1:]
 
