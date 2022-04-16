@@ -9,12 +9,15 @@ import os
 from matplotlib import pyplot as plt
 import time
 import mediapipe as mp
+
+import configuration
 import datacollection as datacollection
+import configuration as conf
 
 # log_dir = os.path.join('Logs')
 # tb_callback = TensorBoard(log_dir=log_dir)
 
-label_map = {label: num for num, label in enumerate(datacollection.actions)}
+label_map = None
 
 model = Sequential()
 
@@ -38,19 +41,23 @@ class TrainingData:
 
 def data_preparation():
     X = np.array(sequences)
+    print('Labels = ' + str(labels))
     y = to_categorical(labels).astype(int)
+    print("sequences = " + str(sequences))
+    print("X = " + str(X))
+    print("y = " + str(y))
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.05)
     return TrainingData(X_train, X_test, y_train, y_test)
 
 
 def build_model():
     # time steps = sequence_length - dimension = number of points per sequence
-    model.add(LSTM(64, return_sequences=True, activation='relu', input_shape=(1, 258)))
+    model.add(LSTM(64, return_sequences=True, activation='relu', input_shape=(configuration.maxNumberFrame, 258)))
     model.add(LSTM(128, return_sequences=True, activation='relu'))
     model.add(LSTM(64, return_sequences=False, activation='relu'))
     model.add(Dense(64, activation='relu'))
     model.add(Dense(32, activation='relu'))
-    model.add(Dense(datacollection.actions.shape[0], activation='softmax'))
+    model.add(Dense(conf.actions.shape[0], activation='softmax'))
 
 
 def train_model(X_train, y_train):
@@ -60,14 +67,52 @@ def train_model(X_train, y_train):
 
 
 def load_seq():
-    for action in datacollection.actions:
-        print("Loading sequences for action = " + action)
-        for sequence in np.array(os.listdir(os.path.join(datacollection.DATA_PATH, action))).astype(int):
+    global label_map
+    label_map = {label: num for num, label in enumerate(conf.actions)}
+    getMaxNumberFrame()
+    for root, directories, files in os.walk(conf.DATA_PATH):
+        numberFrames = len(files)
+        if len(directories) == 0:
+            print("root " + root + " : len files " + str(len(files)))
             window = []
-            for frame_num in range(datacollection.sequence_length):
-                res = np.load(os.path.join(datacollection.DATA_PATH, action, str(sequence), "{}.npy".format(frame_num)))
+            for frame_name in files:
+                res = np.load(os.path.join(root, frame_name))
+                print("res : " + str(res))
                 window.append(res)
-            sequences.append(window)
+            sequences.append(fill_blank_sequence(window, numberFrames, configuration.maxNumberFrame))
+            action = root.split("/")[len(root.split("/")) - 2]
+            print("action : " + action)
+            # labels.append(action)
+            print("Label map = " + str(label_map))
             labels.append(label_map[action])
-    print('Sequences = ' + str(sequences))
+    # print('Sequences = ' + str(sequences))
     print('Labels = ' + str(labels))
+
+    # for action in cfg.actions:
+    #    print("Loading sequences for action = " + action)
+    #    for sequence in np.array(os.listdir(os.path.join(cfg.DATA_PATH, action))).astype(int):
+    #        window = []
+    #        print("sequence : " + str(sequence))
+    # for frame_num in range(datacollection.sequence_length):
+    #    res = np.load(os.path.join(datacollection.DATA_PATH, action, str(sequence), "{}.npy".format(frame_num)))
+    #    window.append(res)
+    # sequences.append(window)
+    # labels.append(label_map[action])
+    # print('Sequences = ' + str(sequences))
+    # print('Labels = ' + str(labels))
+
+
+def getMaxNumberFrame():
+    for root, directories, files in os.walk(conf.DATA_PATH):
+        if len(directories) == 0:
+            if len(files) > conf.maxNumberFrame:
+                conf.maxNumberFrame = len(files)
+
+
+def fill_blank_sequence(sequence, length, max_length):
+    i = max_length - length
+    j = 0
+    while j < i:
+        sequence.append(np.concatenate([np.zeros(33 * 4), np.zeros(21 * 3), np.zeros(21 * 3)]))
+        j += 1
+    return sequence

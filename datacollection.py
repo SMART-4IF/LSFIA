@@ -1,49 +1,28 @@
 import shutil
-
 import cv2
 import numpy as np
 import os
-from matplotlib import pyplot as plt
+import configuration as configuration
 import time
 import mediapipe as mp
 
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 mp_holistic = mp.solutions.holistic  # Holistic model
 mp_drawing = mp.solutions.drawing_utils  # Drawing utilitiesdef mediapipe_detection(image, model):
 
-# Path for exported data, numpy arrays
-DATA_PATH = os.path.join('MP_Data-FRv2')
 
-# Path for import dataset
-DATASET_PATH = "..\dataset"
-
-# Actions that we try to detect
-# Let actions empty to detect all actions (signs)
-# Write down actions wanted like ["action1", "action2", "action3"] (it will manage)
-actions_wanted = []
-actions = []
-action_paths = {}
-
-# Total of videos for each sign
-no_sequences = []
-
-# Videos are going to be 30 frames in length
-sequence_length = 30
-
-for root, directories, files in os.walk(DATASET_PATH):
-    if len(directories) == 0:
-        actualdir = root.split("\\")[len(root.split("\\")) - 1]
-        if not len(actions_wanted) or actualdir in actions_wanted:
-            print(root)
-            actions.append(actualdir)
-            action_paths[actualdir] = root
-            n_seq = 0
-            for video in files:
-                n_seq += 1
-                video_path = os.path.join(DATASET_PATH, actualdir, video)
-            no_sequences.append(n_seq)
-
-# Folder start
-start_folder = 1
+def init_video_variables():
+    for root, directories, files in os.walk(configuration.DATASET_PATH):
+        if len(directories) == 0:
+            actual_dir = root.split("/")[len(root.split("/")) - 1]
+            if not len(configuration.actions_wanted) or actual_dir in configuration.actions_wanted:
+                configuration.actions = np.append(configuration.actions, actual_dir)
+                configuration.action_paths[actual_dir] = root
+                n_seq = 0
+                for video in files:
+                    n_seq += 1
+                    # video_path = os.path.join(DATASET_PATH, actualdir, video)
+                configuration.no_sequences.append(n_seq)
 
 
 def mediapipe_detection(image, model):
@@ -91,7 +70,7 @@ def draw_styled_landmarks(image, results):
     )
 
 
-def extract_keypoints(results):
+def extract_keypoints_holistic(results):
     pose = np.array([[res.x, res.y, res.z, res.visibility] for res in
                      results.pose_landmarks.landmark]).flatten() if results.pose_landmarks else np.zeros(33 * 4)
     face = np.array([[res.x, res.y, res.z] for res in
@@ -106,28 +85,32 @@ def extract_keypoints(results):
 
 def folder_preparation():
     # Génération des dossiers
-    if not os.path.exists(DATA_PATH):
-        os.makedirs(DATA_PATH)
+    if not os.path.exists(configuration.DATA_PATH):
+        os.makedirs(configuration.DATA_PATH)
 
-    for action in actions:
-        if os.path.exists(os.path.join(DATA_PATH, action)):
-            shutil.rmtree(os.path.join(DATA_PATH, action))
-        os.makedirs(os.path.join(DATA_PATH, action))
+    for action in configuration.actions:
+        if len(configuration.actions_wanted) != 0:
+            if action in configuration.actions_wanted and os.path.exists(os.path.join(configuration.DATA_PATH, action)):
+                shutil.rmtree(os.path.join(configuration.DATA_PATH, action))
+            os.makedirs(os.path.join(configuration.DATA_PATH, action))
+        else:
+            if os.path.exists(os.path.join(configuration.DATA_PATH, action)):
+                shutil.rmtree(os.path.join(configuration.DATA_PATH, action))
+            os.makedirs(os.path.join(configuration.DATA_PATH, action))
 
-
-    for action, nbVideo in zip(actions, no_sequences):
-        if np.array(os.listdir(os.path.join(DATA_PATH, action))).astype(int).size != 0:
-            dirmax = np.max(np.array(os.listdir(os.path.join(DATA_PATH, action))).astype(int))
+    for action, nbVideo in zip(configuration.actions, configuration.no_sequences):
+        if np.array(os.listdir(os.path.join(configuration.DATA_PATH, action))).astype(int).size != 0:
+            dirmax = np.max(np.array(os.listdir(os.path.join(configuration.DATA_PATH, action))).astype(int))
         else:
             dirmax = 0
         for sequence in range(1, nbVideo + 1):
             try:
-                os.makedirs(os.path.join(DATA_PATH, action, str(dirmax + sequence)))
+                os.makedirs(os.path.join(configuration.DATA_PATH, action, str(dirmax + sequence)))
             except:
                 pass
 
 
-def change_referential(results):
+def extract_keypoints(results):
     # Search center point in results
     pose, face, lh, rh = None, None, None, None
     if results.pose_landmarks.landmark:
@@ -161,7 +144,7 @@ def change_referential(results):
         rh = np.array([[res.x, res.y, res.z] for res in
                        results.right_hand_landmarks.landmark]).flatten() if results.right_hand_landmarks else np.zeros(
             21 * 3)
-    return np.concatenate([pose, lh, rh]) # face is missing
+    return np.concatenate([pose, lh, rh])  # face is missing
 
 
 def analyse_data():
@@ -170,18 +153,22 @@ def analyse_data():
 
         # NEW LOOP
         # Loop through actions
-        for action, nbVideo in zip(actions, no_sequences):
-
+        for action, nbVideo in zip(configuration.actions, configuration.no_sequences):
             video_num = 0
 
             # Loop through sequences aka videos
-            for video in os.listdir(action_paths.get(action)):
-                cap = cv2.VideoCapture(action_paths.get(action) + "/" + video)
+            for video in os.listdir(configuration.action_paths.get(action)):
+                cap = cv2.VideoCapture(configuration.action_paths.get(action) + "/" + video)
 
                 video_num += 1
 
+                frame_number = frame_count(configuration.action_paths.get(action) + "/" + video, True)
+                print(configuration.action_paths.get(action) + "/" + video + " :: " + str(frame_number) + " frames")
+
+                increment = 0
+                idASCII = 97
                 # Loop through video length aka sequence length
-                for frame_num in range(sequence_length):
+                for frame_num in range(frame_number):
 
                     # Read feed
                     success, frame = cap.read()
@@ -195,19 +182,23 @@ def analyse_data():
                     # Draw landmarks
                     draw_styled_landmarks(image, results)
 
-                    cv2.imshow('OpenCV Feed', image)
-                    # cv2.waitKey(2000)
-                    # NEW Export keypoints
+                    # Export keypoints
                     keypoints = extract_keypoints(results)
-                    npy_path = os.path.join(DATA_PATH, action, str(video_num), str(frame_num))
+                    npy_path = os.path.join(configuration.DATA_PATH, action, str(video_num), chr(idASCII)+str(increment))
                     np.save(npy_path, keypoints)
+
+                    if increment == 9:
+                        increment = 0
+                        idASCII += 1
+                    else:
+                        increment += 1
 
                     # Break gracefully
                     if cv2.waitKey(10) & 0xFF == ord('q'):
                         break
+
                 cap.release()
 
-        cap.release()
         cv2.destroyAllWindows()
 
 
@@ -219,17 +210,17 @@ def record_data():
 
         # NEW LOOP
         # Loop through actions
-        for action in actions:
+        for action in configuration.actions:
             # Loop through sequences aka videos
             time.sleep(2)
 
             # set start_folder
-            dirmax = np.max(np.array(os.listdir(os.path.join(DATA_PATH, action))).astype(int))
-            start_folder = dirmax - no_sequences + 1
+            dirmax = np.max(np.array(os.listdir(os.path.join(configuration.DATA_PATH, action))).astype(int))
+            start_folder = dirmax - configuration.no_sequences + 1
 
-            for sequence in range(start_folder, start_folder + no_sequences):
+            for sequence in range(start_folder, start_folder + configuration.no_sequences):
                 # Loop through video length aka sequence length
-                for frame_num in range(sequence_length):
+                for frame_num in range(configuration.sequence_length):  # TODO Fix
 
                     # Read feed
                     ret, frame = cap.read()
@@ -258,8 +249,8 @@ def record_data():
                         cv2.imshow('OpenCV Feed', image)
 
                     # NEW Export keypoints
-                    keypoints = change_referential(results)
-                    npy_path = os.path.join(DATA_PATH, action, str(sequence), str(frame_num))
+                    keypoints = extract_keypoints(results)
+                    npy_path = os.path.join(configuration.DATA_PATH, action, str(sequence), str(frame_num))
                     np.save(npy_path, keypoints)
 
                     # Break gracefully
@@ -269,7 +260,8 @@ def record_data():
         cap.release()
         cv2.destroyAllWindows()
 
-def frame_count(video_path, manual=False):
+
+def frame_count(video_path, manual=True):
     def manual_count(handler):
         frames = 0
         while True:
@@ -291,102 +283,3 @@ def frame_count(video_path, manual=False):
             frames = manual_count(cap)
     cap.release()
     return frames
-
-def record_dataset():
-
-    setDirectories()
-    setEnvironnement()
-
-    DATASET_PATH = 'MAX_DATA-FR'
-    # Set mediapipe model
-    with mp_holistic.Holistic(min_detection_confidence=0.5, min_tracking_confidence=0.5) as holistic:
-
-        # NEW LOOP
-        # Loop through actions
-        for action, nbVideo in zip(actions, no_sequences):
-
-            video_num = 0
-
-            # Loop through sequences aka videos
-            for video in os.listdir(DATASET_PATH + "/" + action):
-                cap = cv2.VideoCapture(DATASET_PATH + "/" + action + "/" + video)
-
-                video_num += 1
-
-                #Count number of frame of the video
-                nb_frame = frame_count(DATASET_PATH + "/" + action + "/" + video, True)
-
-                # for sequence in range(start_folder, start_folder+no_sequences):
-                # Loop through video length aka sequence length
-                # while cap.isOpened():
-                for frame_num in range(nb_frame):
-
-                    # Read feed
-                    success, frame = cap.read()
-                    # print("success : " + str(success))
-
-                    if not success:
-                        print("Ignoring empty camera frame on video N° " + str(video_num))
-                        break
-                    # Make detections
-                    image, results = mediapipe_detection(frame, holistic)
-
-                    # Draw landmarks
-                    draw_styled_landmarks(image, results)
-
-                    cv2.imshow('OpenCV Feed', image)
-                    # cv2.waitKey(2000)
-                    # NEW Export keypoints
-                    keypoints = extract_keypoints(results)
-                    npy_path = os.path.join(DATA_PATH, action, str(video_num), str(frame_num))
-                    np.save(npy_path, keypoints)
-
-                    # Break gracefully
-                    if cv2.waitKey(10) & 0xFF == ord('q'):
-                        break
-                cap.release()
-
-        cap.release()
-        cv2.destroyAllWindows()
-
-def setDirectories():
-    for action, nbVideo in zip(actions, no_sequences):
-        if np.array(os.listdir(os.path.join(DATA_PATH, action))).astype(int).size != 0:
-            dirmax = np.max(np.array(os.listdir(os.path.join(DATA_PATH, action))).astype(int))
-        else:
-            dirmax = 0
-        for sequence in range(1, nbVideo + 1):
-            try:
-                os.makedirs(os.path.join(DATA_PATH, action, str(dirmax + sequence)))
-            except:
-                pass
-
-def setEnvironnement():
-    # Path for exported data, numpy arrays
-    DATA_PATH = os.path.join('MAX_Data-FR')
-
-    # Path for import dataset
-    DATASET_PATH = "videos"
-
-    # Actions that we try to detect
-    actions = []
-
-    # Total of videos for each sign
-    no_sequences = []
-
-    # Videos are going to be 30 frames in length
-    sequence_length = 30
-
-    for root, directories, files in os.walk(DATASET_PATH):
-        if len(directories) == 0:
-            actualdir = root.split("\\")[len(root.split("\\")) - 1]
-            actions.append(actualdir)
-            actions
-            n_seq = 0
-            for video in files:
-                n_seq += 1
-                video_path = DATASET_PATH + "\\" + actualdir + "\\" + video
-            no_sequences.append(n_seq)
-
-    # Folder start
-    start_folder = 1
