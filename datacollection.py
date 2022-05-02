@@ -283,3 +283,4 @@ def frame_count(video_path, manual=True):
             frames = manual_count(cap)
     cap.release()
     return frames
+
