@@ -15,10 +15,11 @@ number_video = 30
 def record_videos(data_path, action, number_video):
 
     print("Record will start in 3sec")
-    time.sleep(3)  # Sleep for 1 seconds
-    print("Go !")
 
     cap = cv2.VideoCapture(0)
+
+    time.sleep(3)  # Sleep for 1 seconds
+    print("Go !")
 
     width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
     height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
