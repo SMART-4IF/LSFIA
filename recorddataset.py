@@ -14,21 +14,31 @@ number_video = 30
 
 def record_videos(data_path, action, number_video):
 
+    print("Record will start in 3sec")
+    time.sleep(3)  # Sleep for 1 seconds
+    print("Go !")
+
     cap = cv2.VideoCapture(0)
 
     width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
     height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
 
     increment = 0
+    i = 0
     idASCII = 97
 
     for video in range(number_video):
 
         print("Record N°" + str(video) + " :: video called " + chr(idASCII) + str(increment)+'.mp4')
 
-        writer = cv2.VideoWriter(data_path + '/' + (idASCII) + str(increment)+'.mp4', cv2.VideoWriter_fourcc(*'DIVX'), 30, (width, height))
+        writer = cv2.VideoWriter(os.path.join(data_path+ '/' + str(action), chr(idASCII) + str(increment)+'.mp4'), cv2.VideoWriter_fourcc(*'DIVX'), 35, (width, height))
 
-        while True:
+        #time.sleep(1)
+
+        print("REC **** Souriez")
+
+        while i < 30:
+            print("i : " + str(i))
             ret, frame = cap.read()
 
             writer.write(frame)
@@ -37,6 +47,9 @@ def record_videos(data_path, action, number_video):
 
             if cv2.waitKey(1) & 0xFF == 27:
                 break
+            i += 1
+
+        print("Record N°" + str(video) + " :: done")
 
         if increment == 9:
             increment = 0
@@ -44,7 +57,9 @@ def record_videos(data_path, action, number_video):
         else:
             increment += 1
 
-        time.sleep(1)  # Sleep for 1 seconds
+        i = 0
+
+        time.sleep(2)  # Sleep for 1 seconds
 
 
     cap.release()
