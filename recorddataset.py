@@ -33,8 +33,6 @@ def record_videos(data_path, action, number_video):
 
         writer = cv2.VideoWriter(os.path.join(data_path+ '/' + str(action), chr(idASCII) + str(increment)+'.mp4'), cv2.VideoWriter_fourcc(*'DIVX'), 45, (width, height))
 
-        #time.sleep(1)
-
         print("REC **** Souriez")
 
         while i < 45:
@@ -59,7 +57,7 @@ def record_videos(data_path, action, number_video):
 
         i = 0
 
-        time.sleep(2)  # Sleep for 1 seconds
+        time.sleep(3)  # Sleep for 1 seconds
 
 
     cap.release()
