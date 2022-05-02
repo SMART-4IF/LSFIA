@@ -14,7 +14,7 @@ mp_drawing = mp.solutions.drawing_utils  # Drawing utilitiesdef mediapipe_detect
 def init_video_variables():
     for root, directories, files in os.walk(configuration.DATASET_PATH):
         if len(directories) == 0:
-            actual_dir = root.split("/")[len(root.split("/")) - 1]
+            actual_dir = root.split("\\")[len(root.split("\\")) - 1]
             if not len(configuration.actions_wanted) or actual_dir in configuration.actions_wanted:
                 configuration.actions = np.append(configuration.actions, actual_dir)
                 configuration.action_paths[actual_dir] = root

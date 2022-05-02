@@ -80,27 +80,13 @@ def load_seq():
                 print("res : " + str(res))
                 window.append(res)
             sequences.append(fill_blank_sequence(window, numberFrames, configuration.maxNumberFrame))
-            action = root.split("/")[len(root.split("/")) - 2]
+            action = root.split("\\")[len(root.split("\\")) - 2]
             print("action : " + action)
             # labels.append(action)
             print("Label map = " + str(label_map))
             labels.append(label_map[action])
     # print('Sequences = ' + str(sequences))
     print('Labels = ' + str(labels))
-
-    # for action in cfg.actions:
-    #    print("Loading sequences for action = " + action)
-    #    for sequence in np.array(os.listdir(os.path.join(cfg.DATA_PATH, action))).astype(int):
-    #        window = []
-    #        print("sequence : " + str(sequence))
-    # for frame_num in range(datacollection.sequence_length):
-    #    res = np.load(os.path.join(datacollection.DATA_PATH, action, str(sequence), "{}.npy".format(frame_num)))
-    #    window.append(res)
-    # sequences.append(window)
-    # labels.append(label_map[action])
-    # print('Sequences = ' + str(sequences))
-    # print('Labels = ' + str(labels))
-
 
 def getMaxNumberFrame():
     for root, directories, files in os.walk(conf.DATA_PATH):
