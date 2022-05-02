@@ -5,7 +5,7 @@ import numpy as np
 DATA_PATH = "MP_Data-new"
 
 # Path for import dataset
-DATASET_PATH = "videos_test"
+DATASET_PATH = "../dataset2"
 
 # Actions that we try to detect
 # Let actions empty to detect all actions (signs)
