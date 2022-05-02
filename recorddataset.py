@@ -12,9 +12,10 @@ fps = 30
 collection = 'ICIIII'
 number_video = 3
 
-if os.path.exists(os.path.join(configuration.DATA_PATH, collection)):
-    shutil.rmtree(os.path.join(configuration.DATA_PATH, collection))
-os.makedirs(os.path.join(configuration.DATA_PATH, collection))
+
+if os.path.exists(os.path.join(configuration.DATASET_PATH, collection)):
+    shutil.rmtree(os.path.join(configuration.DATASET_PATH, collection))
+os.makedirs(os.path.join(configuration.DATASET_PATH, collection))
 
 def record_videos(data_path, action, number_video):
 
