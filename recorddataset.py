@@ -12,6 +12,13 @@ fps = 30
 collection = 'bonjour'
 number_video = 30
 
+if os.path.exists(os.path.join(configuration.DATA_PATH, collection)):
+    shutil.rmtree(os.path.join(configuration.DATA_PATH, collection))
+os.makedirs(os.path.join(configuration.DATA_PATH, collection))
+
+
+os.mkdir(configuration.DATA_PATH+"/"+collection)
+
 def record_videos(data_path, action, number_video):
 
     print("Record will start in 3sec")
