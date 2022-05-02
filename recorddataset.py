@@ -31,13 +31,13 @@ def record_videos(data_path, action, number_video):
 
         print("Record N°" + str(video) + " :: video called " + chr(idASCII) + str(increment)+'.mp4')
 
-        writer = cv2.VideoWriter(os.path.join(data_path+ '/' + str(action), chr(idASCII) + str(increment)+'.mp4'), cv2.VideoWriter_fourcc(*'DIVX'), 35, (width, height))
+        writer = cv2.VideoWriter(os.path.join(data_path+ '/' + str(action), chr(idASCII) + str(increment)+'.mp4'), cv2.VideoWriter_fourcc(*'DIVX'), 45, (width, height))
 
         #time.sleep(1)
 
         print("REC **** Souriez")
 
-        while i < 30:
+        while i < 45:
             print("i : " + str(i))
             ret, frame = cap.read()
 
