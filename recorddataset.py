@@ -21,6 +21,8 @@ os.mkdir(configuration.DATA_PATH+"/"+collection)
 
 def record_videos(data_path, action, number_video):
 
+    global fps
+
     print("Record will start in 3sec")
 
     cap = cv2.VideoCapture(0)
@@ -30,8 +32,6 @@ def record_videos(data_path, action, number_video):
 
     width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
     height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-    number_frame = 40
-
     increment = 0
     i = 0
     idASCII = 97
@@ -40,11 +40,11 @@ def record_videos(data_path, action, number_video):
 
         print("Record N°" + str(video) + " :: video called " + chr(idASCII) + str(increment)+'.mp4')
 
-        writer = cv2.VideoWriter(os.path.join(data_path+ '/' + str(action), chr(idASCII) + str(increment)+'.mp4'), cv2.VideoWriter_fourcc(*'DIVX'), number_frame, (width, height))
+        writer = cv2.VideoWriter(os.path.join(data_path+ '/' + str(action), chr(idASCII) + str(increment)+'.mp4'), cv2.VideoWriter_fourcc(*'DIVX'), fps, (width, height))
 
         print("REC **** Souriez")
 
-        while i < number_frame:
+        while i < fps:
             print("i : " + str(i))
             ret, frame = cap.read()
 
@@ -69,6 +69,8 @@ def record_videos(data_path, action, number_video):
         time.sleep(3)  # Sleep for 1 seconds
 
     print("Tap ESC to store the videos")
+
+    time.sleep(5)
 
     cap.release()
     writer.release()
