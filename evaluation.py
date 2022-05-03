@@ -1,4 +1,7 @@
 import cv2
+
+import configuration
+import model
 import model as m
 import datacollection as datacollection
 import numpy as np
@@ -40,10 +43,11 @@ def realtime_prediction():
 
             # Read feed
             ret, frame = cap.read()
+            # print("Frame = " + str(frame))
 
             # Make detections
             image, results = datacollection.mediapipe_detection(frame, holistic)
-            print(results)
+            print("Results = " + str(results))
 
             # Draw landmarks
             datacollection.draw_styled_landmarks(image, results)
@@ -51,13 +55,14 @@ def realtime_prediction():
             # 2. Prediction logic
             keypoints = datacollection.extract_keypoints(results)
             sequence.append(keypoints)
-            sequence = sequence[-1:]
+            sequence = sequence[-30:]
 
-            if len(sequence) == 1:
-                res = m.model.predict(np.expand_dims(sequence, axis=0))[0]
+            if len(sequence) == 30:
+                sequence_padded = model.fill_blank_sequence(sequence, len(sequence), configuration.max_number_frame)
+                res = m.model.predict(np.expand_dims(sequence_padded, axis=0))[0]
                 print("Res = " + str(res))
                 best_fit = np.argmax(res)
-                print('Label = ' + datacollection.actions[best_fit] + ' accuracy = ' + str(best_fit))
+                print('Label = ' + configuration.actions[best_fit] + ' accuracy = ' + str(best_fit) + ' frame number = ' + str(len(sequence)) + ' padded up to ' + str(configuration.max_number_frame))
                 predictions.append(np.argmax(res))
 
                 # 3. Viz logic
@@ -65,16 +70,17 @@ def realtime_prediction():
                     if res[np.argmax(res)] > threshold:
 
                         if len(sentence) > 0:
-                            if datacollection.actions[np.argmax(res)] != sentence[-1]:
-                                sentence.append(datacollection.actions[np.argmax(res)])
+                            if configuration.actions[np.argmax(res)] != sentence[-1]:
+                                sentence.append(configuration.actions[np.argmax(res)])
                         else:
-                            sentence.append(datacollection.actions[np.argmax(res)])
+                            sentence.append(configuration.actions[np.argmax(res)])
 
                 if len(sentence) > 5:
                     sentence = sentence[-5:]
 
                 # Viz probabilities
-                image = prob_viz(res, datacollection.actions, image, colors)
+                print("Actions = " + str(configuration.actions))
+                image = prob_viz(res, configuration.actions, image, colors)
 
             cv2.rectangle(image, (0, 0), (640, 40), (245, 117, 16), -1)
             cv2.putText(image, ' '.join(sentence), (3, 30),

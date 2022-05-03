@@ -9,8 +9,9 @@ import mediapipe as mp
 
 # Paramétrer la session
 fps = 30
-collection = 'b'
+collection = 'bonjour'
 number_video = 30
+
 
 if os.path.exists(os.path.join(configuration.DATASET_PATH, collection)):
     shutil.rmtree(os.path.join(configuration.DATASET_PATH, collection))

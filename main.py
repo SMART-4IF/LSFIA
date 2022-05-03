@@ -5,17 +5,14 @@ import evaluation as evaluation
 
 
 def main():
-    #model.getMaxNumberFrame()
-    #print("Max number of frame = " + str(configuration.maxNumberFrame))
+    model.getMaxNumberFrame()
+    print("Max number of frame = " + str(configuration.max_number_frame))
 
     print("Welcome to LSF recognition")
     print("Preparating global variables...")
     datacollection.init_video_variables()
-    print("DEBUG action_wanted length : "+str(len(configuration.actions_wanted)))
     print("Preparating folders...")
     datacollection.folder_preparation()
-    # Debug
-    print(str(configuration.actions))
 
     # Record data
     print("Starting to analyse data...")
@@ -24,8 +21,9 @@ def main():
 
     print("Building and training the model...")
     model.start_model()
-    print("Live predcition")
+    print("Live prediction")
     evaluation.realtime_prediction()
+
 
 if __name__ == "__main__":
     main()

@@ -15,7 +15,6 @@ actions_wanted = np.array([])
 # Folder start
 start_folder = 1
 
-
 ## GLOBAL VARIABLES DO NOT CHANGE #############################
 
 actions = np.array([])
@@ -26,4 +25,4 @@ no_sequences = []
 
 sequence_length = 20
 
-maxNumberFrame = 0
+max_number_frame = 0
