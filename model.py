@@ -24,7 +24,7 @@ model = Sequential()
 sequences, labels = [], []
 
 
-def start_model(load=False):
+def start_model(load=True):
     load_seq()
     build_model()
     if load:
@@ -47,9 +47,6 @@ def data_preparation():
     X = np.array(sequences)
     print('Labels = ' + str(labels))
     y = to_categorical(labels).astype(int)
-    print("sequences = " + str(sequences))
-    print("X = " + str(X))
-    print("y = " + str(y))
     print("X shape = " + str(X.shape))
     print("Y shape = " + str(y.shape))
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.05)
