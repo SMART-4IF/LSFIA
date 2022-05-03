@@ -133,7 +133,7 @@ def extract_keypoints(results):
              results.right_hand_landmarks.landmark]
         ).flatten() if results.right_hand_landmarks else np.zeros(
             21 * 3)
-        return np.concatenate([pose, lh, rh])  # face is missing
+        return np.concatenate([pose, lh, rh])
     elif results.pose_landmarks is not None:
         pose = np.array([[res.x, res.y, res.z, res.visibility] for res in
                          results.pose_landmarks.landmark]).flatten() if results.pose_landmarks else np.zeros(33 * 4)
@@ -145,8 +145,8 @@ def extract_keypoints(results):
         rh = np.array([[res.x, res.y, res.z] for res in
                        results.right_hand_landmarks.landmark]).flatten() if results.right_hand_landmarks else np.zeros(
             21 * 3)
-    return np.array([])  # face is missing
-
+        return np.concatenate([pose, lh, rh])
+    return np.array([])
 
 
 def analyse_data() -> object:
