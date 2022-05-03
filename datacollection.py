@@ -8,13 +8,13 @@ import mediapipe as mp
 
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 mp_holistic = mp.solutions.holistic  # Holistic model
-mp_drawing = mp.solutions.drawing_utils  # Drawing utilitiesdef mediapipe_detection(image, model):
+mp_drawing = mp.solutions.drawing_utils  # Drawing utilities def mediapipe_detection(image, model):
 
 
 def init_video_variables():
     for root, directories, files in os.walk(configuration.DATASET_PATH):
         if len(directories) == 0:
-            actual_dir = root.split("\\")[len(root.split("\\")) - 1]
+            actual_dir = root.split("/")[len(root.split("/")) - 1]
             if len(configuration.actions_wanted) == 0 or actual_dir in configuration.actions_wanted:
                 configuration.actions = np.append(configuration.actions, actual_dir)
                 configuration.action_paths[actual_dir] = root
@@ -23,7 +23,6 @@ def init_video_variables():
                     n_seq += 1
                     # video_path = os.path.join(DATASET_PATH, actualdir, video)
                 configuration.no_sequences.append(n_seq)
-
 
 def mediapipe_detection(image, model):
     image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)  # COLOR CONVERSION BGR 2 RGB

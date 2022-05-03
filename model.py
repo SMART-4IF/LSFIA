@@ -24,12 +24,16 @@ model = Sequential()
 sequences, labels = [], []
 
 
-def start_model(load=False):
+def start_model(load=True):
+    print("Loading sequences...")
     load_seq()
+    print("Building model...")
     build_model()
     if load:
+        print("Loading model...")
         load_model()
     else:
+        print("Training model...")
         training_data = data_preparation()
         train_model(X_train=training_data.X_train, y_train=training_data.y_train)
     save_model()
@@ -45,11 +49,13 @@ class TrainingData:
 
 def data_preparation():
     X = np.array(sequences)
+    print('Wanted actions = ' + str(configuration.actions_wanted))
+    print('Actions = ' + str(configuration.actions))
     print('Labels = ' + str(labels))
     y = to_categorical(labels).astype(int)
-    print("sequences = " + str(sequences))
-    print("X = " + str(X))
-    print("y = " + str(y))
+    # print("sequences = " + str(sequences))
+    # print("X = " + str(X))
+    # print("y = " + str(y))
     print("X shape = " + str(X.shape))
     print("Y shape = " + str(y.shape))
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.05)
@@ -68,7 +74,7 @@ def build_model():
 
 def train_model(X_train, y_train):
     model.compile(optimizer='Adam', loss='categorical_crossentropy', metrics=['categorical_accuracy'])
-    model.fit(X_train, y_train, epochs=400)
+    model.fit(X_train, y_train, epochs=500)
     model.summary()
 
 
@@ -86,22 +92,20 @@ def load_seq():
     for root, directories, files in os.walk(conf.DATA_PATH):
         number_frames = len(files)
         if len(directories) == 0:
-            print("root " + root + " : len files " + str(len(files)))
-            window = []
-            for frame_name in files:
-                res = np.load(os.path.join(root, frame_name))
-                print("res : " + str(res))
-                window.append(res)
-            window_padded = fill_blank_sequence(window, number_frames, configuration.max_number_frame)
-            sequences.append(window_padded)
-            action = root.split("\\")[len(root.split("\\")) - 2]
+            action = root.split("/")[len(root.split("/")) - 2]
             print("action : " + action)
-            if configuration.actions.__contains__(action):
-                # labels.append(action)
-                print("Label map = " + str(label_map))
+            if configuration.actions_wanted.__contains__(action):
+                print("root " + root + " : len files " + str(len(files)))
+                window = []
+                for frame_name in files:
+                    res = np.load(os.path.join(root, frame_name))
+                    # print("res : " + str(res))
+                    window.append(res)
+                window_padded = fill_blank_sequence(window, number_frames, configuration.max_number_frame)
+                sequences.append(window_padded)
                 labels.append(label_map[action])
-    # print('Sequences = ' + str(sequences))
-    print('Labels = ' + str(labels))
+        print("Label map = " + str(label_map))
+
 
 def getMaxNumberFrame():
     for root, directories, files in os.walk(conf.DATASET_PATH):

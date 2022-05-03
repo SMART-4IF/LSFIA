@@ -54,6 +54,11 @@ def realtime_prediction():
 
             # 2. Prediction logic
             keypoints = datacollection.extract_keypoints(results)
+
+            if keypoints.shape == 0:
+                print("Can't find any body")
+                continue
+
             sequence.append(keypoints)
             sequence = sequence[-30:]
 
