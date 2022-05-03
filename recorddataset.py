@@ -9,7 +9,7 @@ import mediapipe as mp
 
 # Paramétrer la session
 fps = 30
-collection = ''
+collection = 'bonjour'
 number_video = 30
 
 
@@ -28,8 +28,9 @@ def record_videos(data_path, action, number_video):
     time.sleep(3)  # Sleep for 1 seconds
     print("Go !")
 
-    width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
-    height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+    #cv2.setWindowProperty("Name", cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
+    width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))#CAP_PROP_FRAME_WIDTH
+    height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))#CAP_PROP_FRAME_HEIGHT
     increment = 0
     i = 0
     idASCII = 97
