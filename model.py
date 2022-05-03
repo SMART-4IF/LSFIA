@@ -54,11 +54,11 @@ def data_preparation():
 
 def build_model():
     # time steps = sequence_length - dimension = number of points per sequence
-    model.add(LSTM(64*4, return_sequences=True, activation='relu', input_shape=(configuration.max_number_frame, 258)))
-    model.add(LSTM(128*4, return_sequences=True, activation='relu'))
-    model.add(LSTM(64*4, return_sequences=False, activation='relu'))
-    model.add(Dense(64*4, activation='relu'))
-    model.add(Dense(32*4, activation='relu'))
+    model.add(LSTM(64, return_sequences=True, activation='relu', input_shape=(configuration.max_number_frame, 258)))
+    model.add(LSTM(128, return_sequences=True, activation='relu'))
+    model.add(LSTM(64, return_sequences=False, activation='relu'))
+    model.add(Dense(64, activation='relu'))
+    model.add(Dense(32, activation='relu'))
     model.add(Dense(conf.actions.shape[0], activation='softmax'))
 
 
