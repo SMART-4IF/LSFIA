@@ -2,15 +2,15 @@ import os
 import numpy as np
 
 # Path for exported data, numpy arrays
-DATA_PATH = "MP_Data-new"
+DATA_PATH = "MP_Data_2"
 
 # Path for import dataset
-DATASET_PATH = "../dataset2"
+DATASET_PATH = "../dataset2.1"
 
 # Actions that we try to detect
 # Let actions empty to detect all actions (signs)
 # Write down actions wanted like ["action1", "action2", "action3"] (it will manage)
-actions_wanted = np.array([])
+actions_wanted = np.array(['avec', 'code'])
 
 # Folder start
 start_folder = 1
@@ -26,4 +26,4 @@ no_sequences = []
 
 sequence_length = 20
 
-maxNumberFrame = 0
+maxNumberFrame = 30

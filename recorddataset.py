@@ -9,8 +9,8 @@ import mediapipe as mp
 
 # Paramétrer la session
 fps = 30
-collection = 'ICIIII'
-number_video = 3
+collection = 'demain'
+number_video = 30
 
 
 if os.path.exists(os.path.join(configuration.DATASET_PATH, collection)):
