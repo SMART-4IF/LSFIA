@@ -9,12 +9,12 @@ import mediapipe as mp
 
 # Paramétrer la session
 fps = 30
-collection = 'bonjour'
+collection = 'b'
 number_video = 30
 
-if os.path.exists(os.path.join(configuration.DATA_PATH, collection)):
-    shutil.rmtree(os.path.join(configuration.DATA_PATH, collection))
-os.makedirs(os.path.join(configuration.DATA_PATH, collection))
+if os.path.exists(os.path.join(configuration.DATASET_PATH, collection)):
+    shutil.rmtree(os.path.join(configuration.DATASET_PATH, collection))
+os.makedirs(os.path.join(configuration.DATASET_PATH, collection))
 
 def record_videos(data_path, action, number_video):
 
@@ -73,4 +73,4 @@ def record_videos(data_path, action, number_video):
     writer.release()
     cv2.destroyAllWindows()
 
-record_videos(configuration.DATA_PATH, collection, number_video)
+record_videos(configuration.DATASET_PATH, collection, number_video)
