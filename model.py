@@ -24,7 +24,7 @@ model = Sequential()
 sequences, labels = [], []
 
 
-def start_model(load=True):
+def start_model(load=False):
     load_seq()
     build_model()
     if load:
@@ -104,7 +104,7 @@ def load_seq():
     print('Labels = ' + str(labels))
 
 def getMaxNumberFrame():
-    for root, directories, files in os.walk(conf.DATA_PATH):
+    for root, directories, files in os.walk(conf.DATASET_PATH):
         if len(directories) == 0:
             if len(files) > conf.max_number_frame:
                 conf.max_number_frame = len(files)

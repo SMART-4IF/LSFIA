@@ -9,7 +9,7 @@ import mediapipe as mp
 
 # Paramétrer la session
 fps = 30
-collection = 'il'
+collection = ''
 number_video = 30
 
 
