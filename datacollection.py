@@ -14,7 +14,7 @@ mp_drawing = mp.solutions.drawing_utils  # Drawing utilitiesdef mediapipe_detect
 def init_video_variables():
     for root, directories, files in os.walk(configuration.DATASET_PATH):
         if len(directories) == 0:
-            actual_dir = root.split("/")[len(root.split("/")) - 1]
+            actual_dir = root.split("\\")[len(root.split("\\")) - 1]
             if not len(configuration.actions_wanted) or actual_dir in configuration.actions_wanted:
                 configuration.actions = np.append(configuration.actions, actual_dir)
                 configuration.action_paths[actual_dir] = root
@@ -133,6 +133,7 @@ def extract_keypoints(results):
              results.right_hand_landmarks.landmark]
         ).flatten() if results.right_hand_landmarks else np.zeros(
             21 * 3)
+        return np.concatenate([pose, lh, rh])  # face is missing
     elif results.pose_landmarks is not None:
         pose = np.array([[res.x, res.y, res.z, res.visibility] for res in
                          results.pose_landmarks.landmark]).flatten() if results.pose_landmarks else np.zeros(33 * 4)
@@ -144,7 +145,8 @@ def extract_keypoints(results):
         rh = np.array([[res.x, res.y, res.z] for res in
                        results.right_hand_landmarks.landmark]).flatten() if results.right_hand_landmarks else np.zeros(
             21 * 3)
-    return np.concatenate([pose, lh, rh])  # face is missing
+    return np.array([])  # face is missing
+
 
 
 def analyse_data() -> object:
