@@ -60,10 +60,10 @@ def realtime_prediction():
             if len(sequence) == 30:
                 sequence_padded = model.fill_blank_sequence(sequence, len(sequence), configuration.max_number_frame)
                 res = m.model.predict(np.expand_dims(sequence_padded, axis=0))[0]
-                #print("Res = " + str(res))
+                print("Res = " + str(res))
                 best_fit = np.argmax(res)
                 predicted_action = configuration.actions[best_fit]
-                #print('Label = ' + configuration.actions[best_fit] + ' accuracy = ' + str(best_fit) + ' frame number = ' + str(len(sequence)) + ' padded up to ' + str(configuration.max_number_frame))
+                print('Label = ' + configuration.actions[best_fit] + ' accuracy = ' + str(best_fit) + ' frame number = ' + str(len(sequence)) + ' padded up to ' + str(configuration.max_number_frame))
                 predictions.append(np.argmax(res))
 
                 # 3. Viz logic

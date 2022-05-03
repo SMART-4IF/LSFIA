@@ -24,11 +24,15 @@ model = Sequential()
 sequences, labels = [], []
 
 
-def start_model():
+def start_model(load=True):
     load_seq()
-    training_data = data_preparation()
     build_model()
-    train_model(X_train=training_data.X_train, y_train=training_data.y_train)
+    if load:
+        load_model()
+    else:
+        training_data = data_preparation()
+        train_model(X_train=training_data.X_train, y_train=training_data.y_train)
+    save_model()
 
 
 class TrainingData:
@@ -64,8 +68,16 @@ def build_model():
 
 def train_model(X_train, y_train):
     model.compile(optimizer='Adam', loss='categorical_crossentropy', metrics=['categorical_accuracy'])
-    model.fit(X_train, y_train, epochs=500)
+    model.fit(X_train, y_train, epochs=50)
     model.summary()
+
+
+def save_model():
+    model.save('action.h5')
+
+
+def load_model():
+    model.load_weights('action.h5')
 
 
 def load_seq():
