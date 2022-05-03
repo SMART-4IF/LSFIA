@@ -68,7 +68,7 @@ def build_model():
 
 def train_model(X_train, y_train):
     model.compile(optimizer='Adam', loss='categorical_crossentropy', metrics=['categorical_accuracy'])
-    model.fit(X_train, y_train, epochs=50)
+    model.fit(X_train, y_train, epochs=400)
     model.summary()
 
 
