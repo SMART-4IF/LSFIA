@@ -14,7 +14,7 @@ mp_drawing = mp.solutions.drawing_utils  # Drawing utilitiesdef mediapipe_detect
 def init_video_variables():
     for root, directories, files in os.walk(configuration.DATASET_PATH):
         if len(directories) == 0:
-            actual_dir = root.split("\\")[len(root.split("\\")) - 1]
+            actual_dir = root.split("/")[len(root.split("/")) - 1]
             if not len(configuration.actions_wanted) or actual_dir in configuration.actions_wanted:
                 configuration.actions = np.append(configuration.actions, actual_dir)
                 configuration.action_paths[actual_dir] = root
@@ -30,7 +30,7 @@ def mediapipe_detection(image, model):
     image.flags.writeable = False  # Image is no longer writeable
     results = model.process(image)  # Make prediction
     image.flags.writeable = True  # Image is now writeable
-    image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)  # COLOR COVERSION RGB 2 BGR
+    image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)  # COLOR CONVERSION RGB 2 BGR
     return image, results
 
 
@@ -45,11 +45,11 @@ def draw_landmarks(image, results):
 
 def draw_styled_landmarks(image, results):
     # Draw face connections
-    #mp_drawing.draw_landmarks(
+    # mp_drawing.draw_landmarks(
     #    image, results.face_landmarks, mp_holistic.FACEMESH_TESSELATION,
     #    mp_drawing.DrawingSpec(color=(80, 110, 10), thickness=1, circle_radius=1),
     #    mp_drawing.DrawingSpec(color=(80, 256, 121), thickness=1, circle_radius=1)
-    #)
+    # )
     # Draw pose connections
     mp_drawing.draw_landmarks(
         image, results.pose_landmarks, mp_holistic.POSE_CONNECTIONS,
@@ -113,7 +113,7 @@ def folder_preparation():
 def extract_keypoints(results):
     # Search center point in results
     pose, face, lh, rh = None, None, None, None
-    if results.pose_landmarks.landmark:
+    if results.pose_landmarks is not None and results.pose_landmarks.landmark[0] is not None:
         ref = results.pose_landmarks.landmark[0]
         pose = np.array(
             [[res.x - ref.x, res.y - ref.y, res.z - ref.z, res.visibility] for res in
@@ -133,7 +133,7 @@ def extract_keypoints(results):
              results.right_hand_landmarks.landmark]
         ).flatten() if results.right_hand_landmarks else np.zeros(
             21 * 3)
-    else:
+    elif results.pose_landmarks is not None:
         pose = np.array([[res.x, res.y, res.z, res.visibility] for res in
                          results.pose_landmarks.landmark]).flatten() if results.pose_landmarks else np.zeros(33 * 4)
         face = np.array([[res.x, res.y, res.z] for res in
@@ -147,7 +147,7 @@ def extract_keypoints(results):
     return np.concatenate([pose, lh, rh])  # face is missing
 
 
-def analyse_data():
+def analyse_data() -> object:
     # Set mediapipe model
     with mp_holistic.Holistic(min_detection_confidence=0.5, min_tracking_confidence=0.5) as holistic:
 
@@ -184,7 +184,8 @@ def analyse_data():
 
                     # Export keypoints
                     keypoints = extract_keypoints(results)
-                    npy_path = os.path.join(configuration.DATA_PATH, action, str(video_num), chr(idASCII)+str(increment))
+                    npy_path = os.path.join(configuration.DATA_PATH, action, str(video_num),
+                                            chr(idASCII) + str(increment))
                     np.save(npy_path, keypoints)
 
                     if increment == 9:
@@ -215,10 +216,10 @@ def record_data():
             time.sleep(2)
 
             # set start_folder
-            dirmax = np.max(np.array(os.listdir(os.path.join(configuration.DATA_PATH, action))).astype(int))
-            start_folder = dirmax - configuration.no_sequences + 1
+            # dirmax = np.max(np.array(os.listdir(os.path.join(configuration.DATA_PATH, action))).astype(int))
+            # start_folder = dirmax - configuration.no_sequences + 1
 
-            for sequence in range(start_folder, start_folder + configuration.no_sequences):
+            for sequence in range(1, 10):
                 # Loop through video length aka sequence length
                 for frame_num in range(configuration.sequence_length):  # TODO Fix
 
@@ -283,4 +284,3 @@ def frame_count(video_path, manual=True):
             frames = manual_count(cap)
     cap.release()
     return frames
-
