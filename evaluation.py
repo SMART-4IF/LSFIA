@@ -28,6 +28,9 @@ def prob_viz(res, actions, input_frame, colors):
                     cv2.LINE_AA)
     return output_frame
 
+predict_repeat = 5
+repeated_action = 0
+repeated_count = 0
 
 def realtime_prediction():
     # 1. New detection variables
@@ -35,6 +38,8 @@ def realtime_prediction():
     sentence = []
     predictions = []
     threshold = 0.4
+
+
 
     cap = cv2.VideoCapture(0)
     # Set mediapipe model
@@ -66,11 +71,11 @@ def realtime_prediction():
                 print('Label = ' + configuration.actions[best_fit] + ' accuracy = ' + str(
                     best_fit) + ' frame number = ' + str(len(sequence)) + ' padded up to ' + str(
                     configuration.max_number_frame))
-                predictions.append(np.argmax(res))
+                predictions.append(predicted_action)
 
                 # 3. Viz logic
-                if np.unique(predictions[-10:])[0] == np.argmax(res):
-                    if res[np.argmax(res)] > threshold:
+                if predictions[-30:].count(predicted_action) > 20:
+                    if res[best_fit] > threshold:
 
                         if len(sentence) > 0:
                             if predicted_action != sentence[-1]:
@@ -78,8 +83,8 @@ def realtime_prediction():
                         else:
                             sentence.append(predicted_action)
 
-                if len(sentence) > 5:
-                    sentence = sentence[-5:]
+                    if len(sentence) > 5:
+                        sentence = sentence[-5:]
 
                 # Viz probabilities
                 image = prob_viz(res, configuration.actions, image, colors)
