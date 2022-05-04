@@ -34,7 +34,7 @@ def realtime_prediction():
     sequence = []
     sentence = []
     predictions = []
-    threshold = 0.5
+    threshold = 0.4
 
     cap = cv2.VideoCapture(0)
     # Set mediapipe model

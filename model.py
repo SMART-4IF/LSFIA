@@ -83,16 +83,15 @@ def load_seq():
     for root, directories, files in os.walk(conf.DATA_PATH):
         number_frames = len(files)
         if len(directories) == 0:
-            print("root " + root + " : len files " + str(len(files)))
+            #print("root " + root + " : len files " + str(len(files)))
             window = []
             for frame_name in files:
                 res = np.load(os.path.join(root, frame_name))
-                print("res : " + str(res))
                 window.append(res)
             window_padded = fill_blank_sequence(window, number_frames, configuration.max_number_frame)
             sequences.append(window_padded)
             action = root.split("\\")[len(root.split("\\")) - 2]
-            print("action : " + action)
+            #print("action : " + action)
             if configuration.actions.__contains__(action):
                 # labels.append(action)
                 print("Label map = " + str(label_map))
